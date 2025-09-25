@@ -1,0 +1,172 @@
+R2#show running
+Building configuration...
+
+Current configuration : 3311 bytes
+!
+version 15.4
+service timestamps log datetime msec
+service timestamps debug datetime msec
+service password-encryption
+!
+hostname R2
+!
+!
+!
+!
+ip dhcp excluded-address 192.168.5.1 192.168.5.5
+ip dhcp excluded-address 192.168.4.1 192.168.4.5
+ip dhcp excluded-address 192.168.3.1 192.168.3.5
+ip dhcp excluded-address 192.168.77.65 192.168.77.70
+ip dhcp excluded-address 192.168.77.129 192.168.77.134
+ip dhcp excluded-address 192.168.77.1 192.168.77.5
+!
+ip dhcp pool VLAN50_POOL
+ network 192.168.5.0 255.255.255.0
+ default-router 192.168.5.1
+ dns-server 8.8.8.8
+ip dhcp pool VLAN40_POOL
+ network 192.168.4.0 255.255.255.0
+ default-router 192.168.4.1
+ dns-server 8.8.8.8
+ip dhcp pool VLAN30_POOL
+ network 192.168.3.0 255.255.255.0
+ default-router 192.168.3.1
+ dns-server 8.8.8.8
+ip dhcp pool VLAN77_FLOOR1
+ network 192.168.77.0 255.255.255.192
+ default-router 192.168.77.1
+ dns-server 8.8.8.8
+ip dhcp pool VLAN77_FLOOR2
+ network 192.168.77.64 255.255.255.192
+ default-router 192.168.77.65
+ dns-server 8.8.8.8
+ip dhcp pool VLAN77_FLOOR3
+ network 192.168.77.128 255.255.255.192
+ default-router 192.168.77.129
+ dns-server 8.8.8.8
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+username admin privilege 15 secret 5 $1$mERr$hx5rVt7rPNoS4wqbXKX7m0
+!
+!
+!
+!
+!
+!
+!
+!
+ip domain-name vic-modern.com
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0/0
+ description R2-to-2nd-Floor-Switch
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0/0.30
+ encapsulation dot1Q 30
+ ip address 192.168.3.1 255.255.255.0
+!
+interface GigabitEthernet0/0/0.40
+ encapsulation dot1Q 40
+ ip address 192.168.4.1 255.255.255.0
+!
+interface GigabitEthernet0/0/0.50
+ encapsulation dot1Q 50
+ ip address 192.168.5.1 255.255.255.0
+!
+interface GigabitEthernet0/0/0.77
+ encapsulation dot1Q 77
+ ip address 192.168.77.65 255.255.255.192
+!
+interface GigabitEthernet0/0/1
+ description Unused-Ports
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface GigabitEthernet0/0/2
+ description Unused-Ports
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Serial0/1/0
+ description R2-to-R1-Serial-Connection
+ ip address 10.10.10.2 255.255.255.252
+!
+interface Serial0/1/1
+ description R2-to-R3-Serial-Connection
+ ip address 10.10.10.5 255.255.255.252
+ clock rate 2000000
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router ospf 1
+ log-adjacency-changes
+ network 10.10.10.0 0.0.0.3 area 0
+ network 10.10.10.4 0.0.0.3 area 0
+ network 10.10.10.8 0.0.0.3 area 0
+ network 192.168.1.0 0.0.0.255 area 0
+ network 192.168.2.0 0.0.0.255 area 0
+ network 192.168.6.0 0.0.0.255 area 0
+ network 192.168.7.0 0.0.0.255 area 0
+ network 192.168.8.0 0.0.0.255 area 0
+ network 192.168.3.0 0.0.0.255 area 0
+ network 192.168.4.0 0.0.0.255 area 0
+ network 192.168.5.0 0.0.0.255 area 0
+ network 192.168.77.0 0.0.0.63 area 0
+ network 192.168.77.64 0.0.0.63 area 0
+ network 192.168.77.128 0.0.0.63 area 0
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+access-list 10 remark Only allow management VLAN 192.168.1.0 to SSH
+access-list 10 permit 192.168.1.0 0.0.0.255
+access-list 10 deny any
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ access-class 10 in
+ logging synchronous
+ login local
+ transport input ssh
+ transport output ssh
+line vty 5 15
+ access-class 10 in
+ logging synchronous
+ login local
+ transport input ssh
+ transport output ssh
+!
+!
+!
+end
